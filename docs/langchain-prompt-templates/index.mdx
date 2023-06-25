@@ -11,15 +11,26 @@ Prompt Engineering and LLMs with Langchain
 
 随着 transformers 和迁移学习的引入，只需在网络末端添加几个小层（即 head）并进行微调，就可以将语言模型适应于不同的任务。
 
-![带有问题回答头或分类头的 transformer 模型](https://d33wubrfki0l68.cloudfront.net/e638b23eac46add83afb9a5fe2d2cda436befe5f/cceaf/images/langchain-prompt-templates-2.png) transformers 和迁移学习的思想使我们能够通过切换模型“头部”并进行微调，重复使用预训练 transformer 模型的相同核心组件来完成不同的任务。
+![带有问题回答头或分类头的 transformer 模型](https://d33wubrfki0l68.cloudfront.net/e638b23eac46add83afb9a5fe2d2cda436befe5f/cceaf/images/langchain-prompt-templates-2.png) 
 
-如今，即使这种方法也已过时。为什么要更改这些模型的最后几层并经历整个微调过程，当您可以直接提示模型进行分类或问答呢。
+transformers 和迁移学习的思想使我们能够通过切换模型“头部 head”并进行微调，重复使用预训练 transformer 模型的相同核心组件来完成不同的任务。
 
-![分类和问答的示例提示](https://d33wubrfki0l68.cloudfront.net/3334549da7979375d869a4182252b21a1d16a1c2/c64ec/images/langchain-prompt-templates-3.png) 通过简单地更改提示中的指令，同一个大型语言模型（LLMs）可以执行许多任务。
-大
-型语言模型（LLMs）可以执行所有这些任务以及更多。这些模型经过简单的训练，将一系列文本 In，并 Out 一系列文本。唯一的变量是 In 文本，即提示。
-在这个 LLMs 的新时代，提示是至关重要的。糟糕的提示会产生糟糕的 Out，而好的提示则具有非常强大的能力。构建良好的提示是那些使用 LLMs 的人的关键技能。
-[LangChain](/docs/langchain-intro/) 库认识到提示的强大作用，并为其构建了一整套对象。在本文中，我们将学习有关 `PromptTemplates` 的所有内容，以及有效地实施它们。
+如今，即使这种方法也已过时。
+
+当您可以直接提示模型进行分类或问答, 为什么要更改这些模型的最后几层并经历整个微调过程呢。
+
+![分类和问答的示例提示](https://d33wubrfki0l68.cloudfront.net/3334549da7979375d869a4182252b21a1d16a1c2/c64ec/images/langchain-prompt-templates-3.png) 
+
+
+通过简单地更改提示中的指令，同一个大型语言模型（LLMs）可以执行许多任务。
+
+大型语言模型（LLMs）可以执行所有这些任务以及更多。这些模型经过简单的训练，将一系列文本 In，并 Out 一系列文本。唯一的变量是 In 文本，即提示。
+
+在这个 LLMs 的新时代，提示是至关重要的。糟糕的提示 In 会产生糟糕的 Out，而好的提示则具有非常强大的能力。构建良好的提示是那些使用 LLMs 的人的关键技能。
+
+[LangChain](/docs/langchain-intro/) 库认识到提示的强大作用，并为其构建了一整套对象。
+
+在本文中，我们将学习有关 `PromptTemplates` 的所有内容，以及有效地实施它们。
 
 
 ---
@@ -28,20 +39,25 @@ Prompt Engineering and LLMs with Langchain
 
 在深入了解 Langchain 的 `PromptTemplate` 之前，我们需要更好地理解提示和提示工程学。
 提示通常由多个部分组成：
-![提示结构](https://d33wubrfki0l68.cloudfront.net/eb8d54f16fcfab0c05143402f7ffdc82b818693b/d90f7/images/langchain-prompt-templates-4.png) 一个典型的提示结构。
+
+![提示结构](https://d33wubrfki0l68.cloudfront.net/eb8d54f16fcfab0c05143402f7ffdc82b818693b/d90f7/images/langchain-prompt-templates-4.png) 
+
+这是一个典型的提示结构。
 
 并非所有的提示都使用这些组件，但是一个好的提示通常会使用两个或更多组件。让我们更加准确地定义它们。
 
-**指令** 告诉模型该怎么做，如何使用外部信息（如果提供），如何处理查询并构建 Out。
+**指令** ：告诉模型该怎么做，如何使用外部信息（如果提供），如何处理查询并构建 Out。
 
-**外部信息** 或 *上下文* 充当模型的附加知识来源。这些可以手动插入到提示中，通过矢量数据库 （Vector Database） 检索（检索增强）获得，或通过其他方式（API、计算等）引入。
+**外部信息** 或 *上下文* ：充当模型的附加知识来源。这些可以手动插入到提示中，通过矢量数据库 （Vector Database） 检索（检索增强）获得，或通过其他方式（API、计算等）引入。
 
-**用户 In** 或 *查询* 通常（但不总是）是由人类用户（即提示者）In 到系统中的查询。
+**用户 In** 或 *查询* ：通常（但不总是）是由人类用户（即提示者）In 到系统中的查询。
 
-**Out 指示器** 标记要生成的文本的 *开头*。
+**Out 指示器** ：标记要生成的文本的 *开头*。
 
 如果生成 Python 代码，我们可以使用 `import` 来指示模型必须开始编写 Python 代码（因为大多数 Python 脚本以 `import` 开头）。
+
 每个组件通常按照这个顺序放置在提示中。从指令开始，外部信息（如果适用），提示者 In，最后是 Out 指示器。
+
 让我们看看如何使用 Langchain 将其 In 到 OpenAI 模型中：
 
 In [5]:
@@ -77,7 +93,6 @@ print(openai(prompt))
 Out [7]:
 ```
  Hugging Face's `transformers` library, OpenAI using the `openai` library, and Cohere using the `cohere` library.
-
 ```
 实际上，我们不太可能硬编码上下文和用户问题。我们会通过一个 *模板 PromptTemplate* 将它们 In，这就是 Langchain 的 `PromptTemplate` 发挥作用的地方。
 
@@ -87,21 +102,16 @@ Langchain 中的提示模板类旨在简化使用动态 In 构建提示的过程
 
 ```
 from langchain import PromptTemplate
-
 template = "" " Answer the question based on the context below. If the
 question cannot be answered using the information provided answer
 with "I don't know".
-
 Context: Large Language Models (LLMs) are the latest models used in NLP.
 Their superior performance over smaller models has made them incredibly
 useful for developers building NLP enabled applications. These models
 can be accessed via Hugging Face's `transformers` library, via OpenAI
 using the `openai` library, and via Cohere using the `cohere` library.
-
 Question: {query}
-
 Answer: "" "
-
 prompt_template = PromptTemplate(
     input_variables = ["query"],
     template = template
@@ -121,41 +131,14 @@ print(
 Out [9]:
 ```
 Answer the question based on the context below. If the
-
-
 question cannot be answered using the information provided answer
-
-
 with "I don't know".
-
-
-
-
-
 Context: Large Language Models (LLMs) are the latest models used in NLP.
-
-
 Their superior performance over smaller models has made them incredibly
-
-
 useful for developers building NLP enabled applications. These models
-
-
 can be accessed via Hugging Face's `transformers` library, via OpenAI
-
-
 using the `openai` library, and via Cohere using the `cohere` library.
-
-
-
-
-
 Question: Which libraries and model providers offer LLMs?
-
-
-
-
-
 Answer: 
 
 ```

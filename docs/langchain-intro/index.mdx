@@ -21,9 +21,10 @@ LangChain 的核心，LangChain 是围绕 LLMs 构建的框架。我们可以将
 
 该库的核心思想是我们可以将不同的组件 *“ 链 ”* 在一起，以创建更高级的 LLMs 用例。链可能由来自几个模块的多个组件组成：
 
-* **Prompt templates**：Prompt templates 是不同类型提示的模板。例如“ chatbot ”样式模板、ELI5 问答等 * * *LLMs* *：像 GPT-3、BLOOM 等大型语言模型
+* **Prompt templates**：Prompt templates 是不同类型提示的模板。例如“ chatbot ”样式模板、ELI5 问答等 
+* **LLMs**：像 GPT-3、BLOOM 等大型语言模型
 * **Agents**：Agents 使用 LLMs 决定应采取的操作。可以使用诸如网络搜索或计算器之类的工具，并将所有工具包装成一个逻辑循环的操作。
-* * *Memory**：短期记忆、长期记忆。
+* **Memory**：短期记忆、长期记忆。
 
 我们将从 **Prompt templates** 和 **LLMs** 的基础知识开始。我们还将探索库中提供的两个 LLMs 选项，使用来自 *Hugging Face Hub* 或 *OpenAI* 的模型。
 
@@ -185,8 +186,8 @@ If I am 6 ft 4 inches, how tall am I in centimeters
 
 OpenAI LLMs
 -----------
-LangChain中的OpenAI端点直接或通过Azure连接到OpenAI。我们需要一个[OpenAI帐户和API密钥](https://beta.openai.com/account/api-keys)来使用这些端点。
-获得API密钥后，我们将其添加到`OPENAI_API_TOKEN`环境变量中。我们可以使用Python来做到这一点：
+LangChain 中的 OpenAI 端点直接或通过 Azure 连接到 OpenAI。我们需要一个[ OpenAI 帐户和 API 密钥](https://beta.openai.com/account/api-keys)来使用这些端点。
+获得 API 密钥后，我们将其添加到`OPENAI_API_TOKEN`环境变量中。我们可以使用 Python 来做到这一点：
 
 ```
 import os
@@ -194,7 +195,7 @@ import os
 os.environ['OPENAI_API_TOKEN'] = 'OPENAI_API_KEY'
 
 ```
-然后，我们必须通过Pip安装`openai`库。
+然后，我们必须通过 Pip 安装`openai`库。
 
 ```
 ! pip install openai
@@ -225,7 +226,7 @@ llm = AzureOpenAI(
 
 
 ---
-我们将与Hugging Face示例一样使用相同的简单问答提示模板。唯一的变化是我们现在传递我们的OpenAI LLM `davinci`：
+我们将与 Hugging Face 示例一样使用相同的简单问答提示模板。唯一的变化是我们现在传递我们的 OpenAI LLM `davinci`：
 In[15]:
 ```
 llm_chain = LLMChain(
@@ -288,8 +289,8 @@ A blade of grass does not have eyes.
 
 
 ---
-这就是我们对LangChain的介绍了——这是一个使我们能够构建更高级应用程序的库，这些应用程序围绕OpenAI的GPT-3模型或通过Hugging Face提供的开源替代方案。
-正如前面提到的，LangChain可以做的远不止我们在这里演示的。我们将在即将发布的文章中介绍这些其他功能。
+这就是我们对 LangChain 的介绍了——这是一个使我们能够构建更高级应用程序的库，这些应用程序围绕 OpenAI的GPT-3 模型或通过Hugging Face 提供的开源替代方案。
+正如前面提到的，LangChain 可以做的远不止我们在这里演示的。我们将在即将发布的文章中介绍这些其他功能。
 
 
 ---
