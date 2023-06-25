@@ -1,10 +1,18 @@
 使用 Langchain 的 LLM 的对话记忆 
 =============================================
-对话记忆是指聊天机器人可以以聊天的方式对多个查询进行响应。它使得对话连贯，并且如果没有它，每个查询都将被视为完全独立的输入，而不考虑过去的交互。
-![具有和不具有对话记忆的情况](https://d33wubrfki0l68.cloudfront.net/41a8697fd44e325cfea1537aa04e1b8ab8cd0f94/915dd/images/langchain-conversational-memory-1.png) 具有和不具有对话记忆的 LLM。蓝色框是用户提示，灰色是 LLM 的响应。没有对话记忆（右侧），LLM 无法使用先前交互的知识进行响应。
 
-记忆 ( memory )允许大型语言模型（LLM）记住与用户的先前交互。默认情况下，LLM 是 `无状态` 的，这意味着每个传入的查询都独立处理，不考虑其他交互。对于无状态代理 (Agents) 来说，唯一存在的是当前输入，没有其他内容。
-有许多应用场景，记住先前的交互非常重要，比如聊天机器人。对话记忆使我们能够做到这一点。
+对话记忆是指聊天机器人可以以聊天的方式对多个查询进行响应。它使得对话连贯，并且如果没有它，每个查询都将被视为完全独立的输入，而不考虑过去的交互。
+
+![具有和不具有对话记忆的情况](https://d33wubrfki0l68.cloudfront.net/41a8697fd44e325cfea1537aa04e1b8ab8cd0f94/915dd/images/langchain-conversational-memory-1.png '具有和不具有对话记忆的 LLM') 
+
+
+蓝色框是用户提示，灰色是 LLM 的响应。左侧把聊天记录存储起来了，最后 LLM 回答出来了。但是没有对话记忆（右侧），LLM 无法使用先前交互的知识进行响应。
+
+记忆 ( memory )允许大型语言模型（LLM）记住与用户的先前交互。
+
+默认情况下，LLM 是 `无状态 stateless` 的，这意味着每个传入的查询都独立处理，不考虑其他交互。对于无状态代理 (Agents) 来说，唯一存在的是当前输入，没有其他内容。
+
+有许多应用场景，记住先前的交互非常重要，比如聊天机器人。 ` ConversationChain ` 对话记忆使我们能够做到这一点。
 
 有几种方法可以实现对话记忆。在 [LangChain](/docs/langchain-intro/) 的上下文中，它们都是构建在 ` ConversationChain ` 之上的。
 
@@ -28,6 +36,7 @@ conversation = ConversationChain(llm=llm)
 
 ```
 我们可以这样查看 `ConversationChain` 的提示模板：
+
 In [8]:
 ```
 print(conversation.prompt.template)
@@ -69,7 +78,9 @@ AI:
 
 *(请参考我们的[Jupyter笔记本](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/03-langchain-conversational-memory.ipynb))*
 
-`ConversationBufferMemory`是LangChain中最直接的对话记忆形式。如上所述，过去人类和AI之间的原始对话输入以其原始形式传递给 `{history}` 参数。
+`ConversationBufferMemory`是LangChain 中最直接的对话记忆形式。
+
+如上所述，过去人类和AI之间的原始对话输入以其原始形式传递给 `{history}` 参数。
 
 In[11]:
 ```
@@ -90,7 +101,11 @@ Out[32]:
  'history': '',
  'response': " Good morning! It's a beautiful day today, isn't it? How can I help you?"}
 ```
-我们返回了对话代理 (Agents) 的第一个响应。让我们继续对话，编写只有在LLM考虑对话历史时才能回答的提示。我们还添加了一个`count_tokens`函数，以便我们可以看到每个交互使用了多少令牌 （Tokens） 。
+我们返回了对话代理 (Agents) 的第一个响应。
+
+让我们继续对话，编写只有在 LLM 考虑对话历史时才能回答的提示。
+
+我们还添加了一个`count_tokens`函数，以便我们可以看到每个交互使用了多少令牌 （Tokens） 。
 
 In[6]:
 ```
@@ -175,7 +190,9 @@ Human: What is my aim again?
 AI:  Your aim is to explore the potential of integrating Large Language Models with external knowledge.
 
 ```
-我们可以看到缓冲区直接保存了聊天历史中的每个交互。这种方法有一些优缺点。简而言之，它们是：
+我们可以看到缓冲区直接保存了聊天历史中的每个交互。这种方法有一些优缺点。
+
+简而言之，它们是：
 
 
 | 优点 | 缺点 |
@@ -183,11 +200,17 @@ AI:  Your aim is to explore the potential of integrating Large Language Models w
 | 存储所有内容为LLM提供了最大数量的信息 | 更多令牌 （Tokens） 意味着响应时间更长和更高的成本 |
 | 存储所有内容简单直观 | 较长的对话无法记住，因为我们达到了LLM的令牌 （Tokens） 限制（`text-davinci-003`和`gpt-3.5-turbo`的令牌 （Tokens） 限制为`4096`） |
 
-`ConversationBufferMemory`是一个很好的选择，但受到存储每个交互的限制。让我们来看一下其他有助于解决这个问题的选项。
+`ConversationBufferMemory`是一个很好的选择，但受到存储每个交互的限制。
+
+让我们来看一下其他有助于解决这个问题的选项。
 
 ### ConversationSummaryMemory
+
 使用`ConversationBufferMemory`，我们很快就会使用*大量*的令牌 （Tokens） ，甚至超过了当今最先进的LLM的上下文窗口限制。
-为了避免过多使用令牌 （Tokens） ，我们可以使用`ConversationSummaryMemory`。顾名思义，这种记忆形式在传递给 `{history}` 参数之前对对话历史进行*总结*。
+为了避免过多使用令牌 （Tokens） ，我们可以使用`ConversationSummaryMemory`。
+
+顾名思义，这种记忆形式在传递给 `{history}` 参数之前对对话历史进行*总结*。
+
 我们可以这样初始化`ConversationChain`以使用总结记忆：
 
 ```
@@ -199,7 +222,10 @@ conversation = ConversationChain(
 )
 
 ```
-当使用`ConversationSummaryMemory`时，我们需要向对象传递一个LLM，因为总结是由LLM提供支持的。我们可以在这里看到用于此操作的提示：
+当使用`ConversationSummaryMemory`时，我们需要向对象传递一个LLM，因为总结是由LLM提供支持的。
+
+我们可以在这里看到用于此操作的提示：
+
 In[19]:
 ```
 print(conversation_sum.memory.prompt.template)
@@ -229,7 +255,9 @@ New lines of conversation:
 New summary:
 
 ```
-使用这种方法，我们可以总结每个新的交互，并将其附加到所有过去交互的 `运行汇总` 中。让我们再次进行一次对话，利用这种方法。
+使用这种方法，我们可以总结每个新的交互，并将其附加到所有过去交互的 `运行汇总` 中。
+
+让我们再次进行一次对话，利用这种方法。
 
 In[40]:
 ```
@@ -293,7 +321,10 @@ Out[44]:
 Spent a total of 853 tokens
 ' Your aim is to explore the potential of integrating Large Language Models with external knowledge.'
 ```
-在这种情况下，总结包含了足够的信息，以便LLM `记住` 我们最初的目标。我们可以这样看到这个总结的原始形式：
+在这种情况下，总结包含了足够的信息，以便 LLM *"记住"* 我们最初的目标。
+
+我们可以这样看到这个总结的原始形式：
+
 In[45]:
 ```
 print(conversation_sum.memory.buffer)
@@ -304,11 +335,22 @@ Out[45]:
 The human greeted the AI with a good morning, to which the AI responded with a good morning and asked how it could help. The human expressed interest in exploring the potential of integrating Large Language Models with external knowledge, to which the AI responded positively and asked for more information. The human asked the AI to think of different possibilities, and the AI suggested three options: using the large language model to generate a set of candidate answers and then using external knowledge to filter out the most relevant answers, score and rank the answers, or refine the answers. The human then asked which data source types could be used to give context to the model, to which the AI responded that there are many different types of data sources that could be used, such as structured data sources, unstructured data sources, or external APIs. Additionally, the model could be trained on a combination of these data sources to provide a more comprehensive understanding of the context. The human then asked what their aim was again, to which the AI responded that their aim was to explore the potential of integrating Large Language Models with external knowledge.
 
 ```
+
 与使用`ConversationBufferMemory`相比，此对话使用了更多的令牌 （Tokens） ，那么使用`ConversationSummaryMemory`是否有任何优势呢？
 
-![随着交互数量增加，令牌 （Tokens） 数量的变化](https://d33wubrfki0l68.cloudfront.net/88c3a63dd5bdf04ad00da7f6b3a192f2340b271a/058e3/images/langchain-conversational-memory-3.png)令牌 （Tokens） 数量（y轴）与交互数量（x轴）的变化：缓冲内存与总结内存。
+![随着交互数量增加，令牌 （Tokens） 数量的变化](https://d33wubrfki0l68.cloudfront.net/88c3a63dd5bdf04ad00da7f6b3a192f2340b271a/058e3/images/langchain-conversational-memory-3.png)
 
-对于较长的对话来说，是的。[在这里](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/03a-token-counter.ipynb)，我们有一个较长的对话。如上所示，总结内存最初使用的令牌 （Tokens） 数量要多得多。然而，随着对话的进行，总结方法的增长速度较慢。相比之下，缓冲区内存的令牌 （Tokens） 数量与聊天中的令牌 （Tokens） 数量呈线性增长。
+令牌 （Tokens） 数量（y轴）与交互数量（x轴）的变化：缓冲内存 `ConversationBufferMemory` 与总结内存  `ConversationSummaryMemory` 。
+
+对于较长的对话来说，是的。
+
+[在这里](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/03a-token-counter.ipynb)，我们有一个较长的对话。
+
+如上所示，总结内存最初使用的令牌 （Tokens） 数量要多得多。
+
+然而，随着对话的进行，总结方法的增长速度较慢。
+
+相比之下，缓冲区内存的令牌 （Tokens） 数量与聊天中的令牌 （Tokens） 数量呈线性增长。
 
 我们总结`ConversationSummaryMemory`的优点和缺点如下：
 
@@ -319,11 +361,15 @@ The human greeted the AI with a good morning, to which the AI responded with a g
 | 能够实现更长的对话 | 对话历史的记忆完全依赖于中间摘要LLM的概括能力 |
 | 实现相对简单，直观易懂 | 摘要LLM也需要使用令牌 （Tokens） ，这会增加成本（但不限制对话长度） |
 
-对话摘要是处理长对话的良好方法。然而，它仍然受到令牌 （Tokens） 限制的基本限制。经过一段时间后，我们仍然会超出上下文窗口的限制。
+对话摘要是处理长对话的良好方法。然而，它仍然受到令牌 （Tokens） 限制的基本限制。
 
-### 对话缓冲窗口记忆 ConversationBufferWindowMemory
+经过一段时间后，我们仍然会超出上下文窗口的限制。
 
-`ConversationBufferWindowMemory`的功能与我们之前的 `缓冲记忆` 相同，但是在记忆中添加了一个 `窗口` 。这意味着在 `忘记` 之前，我们只保留给定数量的过去交互。我们使用它的方式如下所示：
+### 对话缓冲窗口记忆 ConversationBufferWindowMemory 
+
+`ConversationBufferWindowMemory`的功能与我们之前的 `缓冲记忆 ConversationBufferMemory` 相同，但是在记忆中添加了一个 `窗口 Window` 。这意味着在 “忘记” 之前，我们只保留给定数量的过去交互。
+
+我们使用它的方式如下所示：
 
 ```
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
@@ -334,7 +380,11 @@ conversation = ConversationChain(
 )
 
 ```
-在这个例子中，我们设置`k=1`，这意味着窗口将记住人类和AI之间的单个最新交互。也就是最新的人类回应和最新的AI回应。我们可以在下面看到其效果：
+在这个例子中，我们设置`k=1`，这意味着窗口将记住人类和AI之间的单个最新交互。
+
+也就是最新的人类回应和最新的AI回应。我们可以在下面看到其效果：
+
+
 In[61]:
 ```
 count_tokens(
@@ -395,8 +445,12 @@ Out[65]:
 Spent a total of 186 tokens
 ' Your aim is to use data sources to give context to the model.'
 ```
-在对话结束时，当我们询问` `我的目标是什么？` `时，这个答案在三次交互之前的人类回应中包含。由于我们只保留了最近的交互（`k=1`），模型已经遗忘了，并且无法给出正确的答案。
-我们可以这样查看模型的 `记忆` 效果：
+在对话结束时，当我们询问：“我的目标是什么？”时，这个答案在三次交互之前的人类回应中包含。
+
+由于我们只保留了最近的交互（`k=1`），模型已经遗忘了，并且无法给出正确的答案。
+
+我们可以这样查看模型的 “记忆” 效果：
+
 In[66]:
 ```
 bufw_history = conversation_bufw.memory.load_memory_variables(
@@ -413,13 +467,22 @@ Human: What is my aim again?
 AI:  Your aim is to use data sources to give context to the model.
 
 ```
-尽管这种方法不适合记忆较远的交互，但它在限制令牌 （Tokens） 使用数量方面表现出色——这是一个我们可以根据需要增加/减少的数字。对于我们在之前比较中使用的[较长对话](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/03a-token-counter.ipynb)，我们可以设置`k=6`，在27次总交互后每个交互达到约1.5K个令牌 （Tokens） ：
+
+尽管这种方法不适合记忆较远的交互，但它在限制令牌 （Tokens） 使用数量方面表现出色——这是一个我们可以根据需要增加/减少的数字。
+
+对于我们在之前比较中使用的[较长对话](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/03a-token-counter.ipynb)，我们可以设置`k=6`，在27次总交互后每个交互达到约1.5K个令牌 （Tokens） ：
+
 ![包括缓冲窗口记忆的令牌 （Tokens） 数量比较](https://d33wubrfki0l68.cloudfront.net/f076c3f2968833363a7083882c8f648f552cdeb7/23eba/images/langchain-conversational-memory-4.png)包括`ConversationBufferWindowMemory`在`k=6`和`k=12`时的令牌 （Tokens） 数量。
+
 如果我们只需要最近交互的记忆，这是一个很好的选择。然而，对于远程和最近交互的混合，还有其他选择。
 
 ### 对话摘要缓冲窗口记忆 ConversationSummaryBufferMemory
 
-`ConversationSummaryBufferMemory`是`ConversationSummaryMemory`和`ConversationBufferWindowMemory`的混合体。它概述了对话中最早的交互，同时保留其对话中最近的`max_token_limit`个令牌 （Tokens） 。它的初始化方式如下所示：
+`ConversationSummaryBufferMemory`是`ConversationSummaryMemory`和`ConversationBufferWindowMemory`的混合体。
+
+它概述了对话中最早的交互，同时保留其对话中最近的`max_token_limit`个令牌 （Tokens） 。
+
+它的初始化方式如下所示：
 
 ```
 conversation_sum_bufw = ConversationChain(
@@ -430,27 +493,40 @@ conversation_sum_bufw = ConversationChain(
 
 ```
 将其应用于我们之前的对话时，我们可以将`max_token_limit`设为一个较小的数值，但LLM仍然能记住我们之前的 `目标` 。
-这是因为该信息被记忆的 `摘要` 组件捕获，尽管被 `缓冲窗口` 组件忽略。
+
+这是因为该信息被记忆的 `摘要 Summary` 组件捕获，尽管被 `缓冲窗口 BufferWindow` 组件忽略。
+
 当然，该组件的优缺点是基于其所基于的早期组件的综合结果。
 
 
 | 优点 | 缺点 |
 | --- | --- |
-| 摘要器意味着我们可以记住较远的交互 | 摘要器增加了较短对话的令牌 （Tokens） 数量 |
-| 缓冲器防止我们错过最近交互的信息 | 存储原始交互——即使只是最近交互——增加了令牌 （Tokens） 数量 |
+|  Summary 摘要器意味着我们可以记住较远的交互 | 摘要器增加了较短对话的令牌 （Tokens） 数量 |
+| Buffer 缓冲器防止我们错过最近交互的信息 | 存储原始交互——即使只是最近交互——增加了令牌 （Tokens） 数量 |
 
 尽管需要更多调整以确定摘要和缓冲窗口内要保留的内容，但`ConversationSummaryBufferMemory`确实为我们提供了很大的灵活性，并且是我们目前唯一一个既能记住远程交互又能以其原始形式（最丰富的信息形式）存储最近交互的记忆类型。
+
 ![不同对话记忆类型的完整比较及对令牌 （Tokens） 数量的影响](https://d33wubrfki0l68.cloudfront.net/114eadb6f869d328ebc828d018aec8ce1a498437/89d76/images/langchain-conversational-memory-5.png)包括`ConversationSummaryBufferMemory`类型的令牌 （Tokens） 数量比较，其`max_token_limit`值分别为`650`和`1300`。
+
 我们还可以看到，尽管包括了过去交互的摘要和最近交互的原始形式，`ConversationSummaryBufferMemory`的令牌 （Tokens） 数量增加与其他方法相当。
 
 ### 其他记忆类型 Other Memory Types
+
 我们在这里介绍的记忆类型非常适合入门，并在在尽可能记住尽可能多的内容和最小化令牌 （Tokens） 之间取得了良好的平衡。
-然而，我们还有其他选择——尤其是`ConversationKnowledgeGraphMemory`和`ConversationEntityMemory`。我们将在接下来的章节中对这些不同形式的记忆进行详细介绍。
+
+然而，我们还有其他选择——尤其是`ConversationKnowledgeGraphMemory`和`ConversationEntityMemory`。
+
+我们将在接下来的章节中对这些不同形式的记忆进行详细介绍。
 
 
 ---
-这就是关于使用LangChain的LLM进行对话记忆的介绍。正如我们所见，有很多选项可以帮助*无状态*的LLM以类似于*有状态 stateless* 环境的方式进行交互，能够考虑并参考过去的交互。
-如前所述，我们还可以涵盖其他形式的记忆。我们还可以实现自己的记忆模块，在同一链中使用多种类型的记忆，将它们与代理 (Agents) 结合使用等等。所有这些内容将在未来的章节中介绍。
+这就是关于使用LangChain的LLM进行对话记忆的介绍。
+
+正如我们所见，有很多选项可以帮助*无状态 state*的LLM以类似于*有状态 state* 环境的方式进行交互，能够考虑并参考过去的交互。
+
+如前所述，我们还可以涵盖其他形式的记忆。我们还可以实现自己的记忆模块，在同一链中使用多种类型的记忆，将它们与代理 (Agents) 
+
+结合使用等等。所有这些内容将在未来的章节中介绍。
 
 
 ---

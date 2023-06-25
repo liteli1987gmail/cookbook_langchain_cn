@@ -157,17 +157,25 @@ Out [10]:
  Hugging Face's `transformers` library, OpenAI using the `openai` library, and Cohere using the `cohere` library.
 
 ```
-这只是一个简单的实现，可以轻松地用 f-strings（如 `f"insert some custom text '{custom_text}' etc"`）替换。然而，使用 Langchain 的 `PromptTemplate` 对象，我们可以规范化这个过程，添加多个参数，并以面向对象的方式构建提示。
+这只是一个简单的实现，可以轻松地用 f-strings（如 `f"insert some custom text '{custom_text}' etc"`）替换。然而，使用 
+
+Langchain 的 `PromptTemplate` 对象，我们可以规范化这个过程，添加多个参数，并以面向对象的方式构建提示。
+
 这些都是 Langchain 提供的帮助我们处理提示的重要优势之一。
 
 ### Few Shot 提示模板
 
 LLMs 的成功来自于它们的大规模和在模型训练期间通过学习来存储“知识”的能力。然而，还有其他一些向 LLMs 传递知识的方法。主要方法有两种：
+
 * **参数化知识** - 上述提到的知识是在模型训练期间由模型学习到的，并存储在模型权重（或 *参数*）中的任何内容。
 * **来源知识** - 通过 In 提示在推理时向模型提供的任何知识。
 
-Langchain 的 `FewShotPromptTemplate` 适用于 **来源知识** In。其思想是对少量示例进行“训练” - 我们称之为 * `few-shot learning` * - 并将这些示例在提示中提供给模型。
- `few-shot learning` 在我们的模型需要帮助理解我们要求它做什么时非常有效。我们可以通过以下示例来看到这一点：
+Langchain 的 `FewShotPromptTemplate` 适用于 **来源知识** In。
+
+其思想是对少量示例进行“训练 train” - 我们称之为 * `few-shot learning` * - 并将这些示例在提示中提供给模型。
+ `few-shot learning` 在我们的模型需要帮助理解我们要求它做什么时非常有效。
+ 
+ 我们可以通过以下示例来看到这一点：
 
 In [12]:
 ```
@@ -188,6 +196,7 @@ Out [12]:
 
 ```
 在这种情况下，我们在严肃的问题中要求得到一些有趣的东西，如一个笑话。然而，即使将 `temperature` 设置为 `1.0`（增加随机性/创造性），我们仍然得到一个严肃的回答。
+
 为了帮助模型，我们可以给它一些我们想要的回答类型的示例：
 
 In [13]:
@@ -213,7 +222,7 @@ Out [13]:
  42, of course!
 
 ```
-通过示例来强化我们在提示中传递的指令，我们更有可能得到一个更有趣的回答。然后，我们可以使用 Langchain 的 `FewShotPromptTemplate` 正式化这个过程：
+通过示例来强化我们在提示中传递的指令，我们更有可能得到一个更有趣的回答。然后，我们可以使用 Langchain 的 `FewShotPromptTemplate` 规范化这个过程：
 
 ```
 from langchain import FewShotPromptTemplate
@@ -286,7 +295,7 @@ AI:
 
 再次提醒，这种方法更加规范化，能够很好地与 Langchain 的其他功能整合（比如链式结构，稍后会详细介绍），并且具备多种特性。其中之一就是根据查询长度来可变地包含不同数量的示例。
 
-动态数量的示例非常重要，因为我们的提示和补全 Out 的最大长度是有限的。这个限制通过 **最大上下文窗口 maximum context window** 进行衡量。
+动态数量的示例非常重要，因为我们的提示和补全 (completion) Out 的最大长度是有限的。这个限制通过 **最大上下文窗口 maximum context window** 进行衡量。
 
 
 上下文窗口 (ontext window) = In 标记 (input_tokens) + Out 标记 (output tokens)
@@ -295,7 +304,7 @@ AI:
 
 同时，我们可以通过少样本学习来 *最大化* 给模型的示例数量。
 
-考虑到这一点，我们需要平衡包含的示例数量和提示的大小 。我们的 *硬性限制* 是 **最大上下文窗口 maximum context window**，但我们还必须考虑通过 LLM 处理更多标记的 *成本*。较少的标记意味着更便宜的服务和更快的 LLM 补全。
+考虑到这一点，我们需要平衡包含的示例数量和提示的大小 。我们的 *硬性限制* 是 **最大上下文窗口 maximum context window**，但我们还必须考虑通过 LLM 处理更多标记的 *成本*。较少的标记意味着更便宜的服务和更快的 LLM 补全 (completion)。
 
 `FewShotPromptTemplate` 允许我们根据这些变量来可变地包含示例。首先，我们创建一个更广泛的 `examples` 列表：
 
