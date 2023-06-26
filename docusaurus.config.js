@@ -128,6 +128,11 @@ const config = {
         items: [
           {
             to: "/docs/",
+            label: "中文手册",
+            position: "left",
+          },
+          {
+            to: "https://docs.langchain.com.cn",
             label: "Concepts",
             position: "left",
           },
@@ -200,6 +205,10 @@ const config = {
               {
                 label: "DOCS",
                 href: "https://github.com/liteli1987gmail/docs_langchain_cn",
+              },
+              {
+                label: "Langchain 中文手册",
+                href: "https://github.com/liteli1987gmail/cookbook_langchain_cn",
               },
             ],
           }
