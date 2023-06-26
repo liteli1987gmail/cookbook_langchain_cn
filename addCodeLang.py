@@ -6,10 +6,10 @@ def replace_code_blocks(directory):
         for file in files:
             if file.endswith(".mdx"):
                 filepath = os.path.join(root, file)
-                with open(filepath, 'r') as f:
+                with open(filepath, 'r', encoding="utf-8") as f:
                     lines = f.readlines()
 
-                with open(filepath, 'w') as f:
+                with open(filepath, 'w', encoding="utf-8") as f:
                     for line in lines:
                         stripped_line = line.strip()
                         if stripped_line == "```":  # This line is a code block delimiter
@@ -23,4 +23,4 @@ def replace_code_blocks(directory):
                             f.write(line)
 
 # 使用函数，例如遍历 'my_directory' 文件夹
-replace_code_blocks('my_directory')
+replace_code_blocks('docs')

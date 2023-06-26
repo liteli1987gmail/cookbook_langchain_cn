@@ -4,7 +4,7 @@
 Building Custom Tools for LLM Agents
 ---
 
-[代理 (Agents) ](/docs/langchain-agents) 是使用大型语言模型（LLM）最强大和最有趣的方法之一。LLM 的兴起使得代理 (Agents) 在基于人工智能的应用中变得非常普遍。
+[代理 (Agents) ](https://cookbook.langchain.com.cn/docs/langchain-agents) 是使用大型语言模型（LLM）最强大和最有趣的方法之一。LLM 的兴起使得代理 (Agents) 在基于人工智能的应用中变得非常普遍。
 
 使用代理 (Agents) 可以让 LLM 访问工具。这些工具提供了无限的可能性。有了工具，LLM 可以搜索网络、进行数学计算、运行代码等等。
 
@@ -33,7 +33,7 @@ LangChain 库提供了大量预置的工具。然而，在许多真实项目中�
 
 创建该工具，我们需要执行以下操作：
 
-```
+```python
 from langchain.tools import BaseTool
 from math import pi
 from typing import Union
@@ -66,7 +66,7 @@ LangChain 要求工具具有两个属性，即 `name` 和 `description` 参数�
 
 准备好后，我们可以这样初始化 LLM 和内存：
 
-```
+```python
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
@@ -92,7 +92,7 @@ conversational_memory = ConversationBufferWindowMemory(
 
 现在我们可以初始化代理 (Agents) 本身了。它需要已经初始化的 `llm` 和 `conversational_memory`。它还需要一个要使用的 `tools` 列表。我们有一个工具，但我们仍然将它放入列表中。
 
-```
+```python
 from langchain.agents import initialize_agent
 
 tools = [CircumferenceTool()]
@@ -117,12 +117,12 @@ agent = initialize_agent(
 
 有了这一切，我们可以要求我们的代理 (Agents) 计算圆的周长。
 
-```
+```python
 agent("can you calculate the circumference of a circle that has a radius of 7.81mm")
 ```
 Out[]:
 
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m{
     "action": "Final Answer",
@@ -140,12 +140,12 @@ Out[]:
 ```
 Out[]:
 
-```
+```python
 49.071677249072565
 ```
 代理 (Agents) 接近目标，但却不准确——出现了某些问题。我们可以在 **AgentExecutor Chain** 的输出中看到代理 (Agents) 直接跳到 **Final Answer** 操作：
 
-```
+```python
 { "action": "Final Answer", "action_input": "The circumference of a circle with a radius of 7.81mm is approximately 49.03mm." }
 
 ```
@@ -153,13 +153,13 @@ Out[]:
 
 LLM 在数学方面通常表现不佳，但这并不能阻止它尝试进行数学计算。问题是由于 LLM 对其数学能力过于自信所致。为了解决这个问题，我们必须告诉模型它 *不能* 进行数学计算。首先，让我们看一下当前使用的提示文本：
 
-```
+```python
 # existing prompt
 print(agent.agent.llm_chain.prompt.messages[0].prompt.template)
 ```
 Out[]:
 
-```
+```python
 Assistant is a large language model trained by OpenAI.
 
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -171,7 +171,7 @@ Overall, Assistant is a powerful system that can help with a wide range of tasks
 ```
 我们将添加一句话，告诉模型它在数学方面是 *“糟糕透顶的 terrible at math”*，永远不应该尝试进行数学计算。
 
-```
+```python
 Unfortunately, the Assistant is terrible at maths. When provided with math questions, no matter how simple, assistant always refers to its trusty tools and absolutely does NOT try to answer math questions by itself
 
 ```
@@ -179,7 +179,7 @@ Unfortunately, the Assistant is terrible at maths. When provided with math quest
 将此添加到原始提示文本中后，我们使用 `agent.agent.create_prompt` 创建新的提示文本，这将为我们的代理 (Agents) 创建正确的提示结构，包括工具描述。然后，我们更新 `agent.agent.llm_chain.prompt`。
 
 
-```
+```python
 sys_msg = """Assistant is a large language model trained by OpenAI.
 
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -201,13 +201,13 @@ agent.agent.llm_chain.prompt = new_prompt
 
 现在我们可以再试一次：
 
-```
+```python
 agent("can you calculate the circumference of a circle that has a radius of 7.81mm")
 ```
 
 Out[]:
 
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m```json
 {
@@ -244,7 +244,7 @@ Thought:[32;1m[1;3m```json
 
 我们这样定义新的工具：
 
-```
+```python
 from typing import Optional
 from math import sqrt, cos, sin
 
@@ -314,11 +314,11 @@ tools = [PythagorasTool()]
 
 现在我们可以继续要求代理 (Agents) 描述上述相同的图片，将其 URL 传递给查询。
 
-```
+```python
 agent(f"What does this image show?\n{img_url}")
 ```
 Out[]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m{
     "action": "Image captioner",
@@ -369,12 +369,12 @@ Thought:[32;1m[1;3m{
 让我们再试一些：
 ![冲浪的人](https://d33wubrfki0l68.cloudfront.net/1f3f639410a3f137375a36543f4a35d59c519c10/dd757/images/langchain-tools-1.png)
 
-```
+```python
 img_url = "https://images.unsplash.com/photo-1502680390469-be75c86b636f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2370&q=80"
 agent(f"what is in this image?\n{img_url}")
 ```
 Out[]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m{
     "action": "Image captioner",
@@ -404,12 +404,12 @@ Thought:[32;1m[1;3m{
 这是另一个准确的描述。让我们尝试一些更具挑战性的东西：
 ![小鳄鱼站在一根木头上](https://d33wubrfki0l68.cloudfront.net/e4814f6d30b87543ed4a722ae4e8199fa3b58624/8a74f/images/langchain-tools-2.png)
 
-```
+```python
 img_url = "https://images.unsplash.com/photo-1680382948929-2d092cd01263?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2365&q=80"
 agent(f"what is in this image?\n{img_url}")
 ```
 Out[]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m```json
 {

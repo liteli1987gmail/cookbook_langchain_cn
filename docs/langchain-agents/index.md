@@ -47,7 +47,7 @@ GPT-4 无法告诉我们关于 LangChain 的信息，这是因为它与外部世
 
 让我们从安装 `langchain` 并初始化我们的基本 LLM 开始。
 
-```
+```python
 from langchain import OpenAI
 
 llm = OpenAI(
@@ -66,7 +66,7 @@ llm = OpenAI(
 例如，我们可以从现有的 `llm_math` 链创建一个新的计算器工具：
 
 In [3]:
-```
+```python
 from langchain.chains import LLMMathChain
 from langchain.agents import Tool
 
@@ -82,18 +82,18 @@ math_tool = Tool(
 tools = [math_tool]
 ```
 In [4]:
-```
+```python
 tools [0].name, tools [0].description
 ```
 Out [4]:
-```
+```python
 ('Calculator', 'Useful for when you need to answer questions about math.')
 ```
 
 在使用自定义工具时，我们必须遵循此过程。然而，一个预构建的 `llm_math` 工具可以做同样的事情。所以，我们可以这样做：
 
 In [5]:
-```
+```python
 from langchain.agents import load_tools
 
 tools = load_tools(
@@ -102,11 +102,11 @@ tools = load_tools(
 )
 ```
 In [6]:
-```
+```python
 tools [0].name, tools [0].description
 ```
 Out [6]:
-```
+```python
 ('Calculator', 'Useful for when you need to answer questions about math.')
 ```
 如果我们的用例存在一个预构建的工具，我们只能按照第二种方法进行。
@@ -115,7 +115,7 @@ Out [6]:
 
 要初始化一个简单的代理 (Agents) ，我们可以这样做：
 
-```
+```python
 from langchain.agents import initialize_agent
 
 zero_shot_agent = initialize_agent(
@@ -140,11 +140,11 @@ zero_shot_agent = initialize_agent(
 初始化了我们的代理 (Agents) 后，我们可以开始使用它。让我们尝试一些提示，看看代理 (Agents) 如何回应。
 
 In [8]:
-```
+```python
 zero_shot_agent(" what is (4.5*2.1)^2.2?")
 ```
 Out [8]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m I need to calculate this expression
 Action: Calculator
@@ -157,24 +157,24 @@ Final Answer: 139.94261298333066 [0m
 {'input': 'what is (4.5*2.1)^2.2?', 'output': '139.94261298333066'}
 ```
 In [9]:
-```
+```python
 (4.5 *2.1)**2.2
 ```
 Out [9]:
-```
+```python
 139.94261298333066
 ```
 
 这里的答案是正确的。让我们再试一次：
 
 In [10]:
-```
+```python
 zero_shot_agent("if Mary has four apples and Giorgio brings two and a half apple "
                 "boxes (apple box contains eight apples), how many apples do we "
                 "have?")
 ```
 Out [10]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m I need to figure out how many apples are in the boxes
 Action: Calculator
@@ -196,11 +196,11 @@ Final Answer: We have 24 apples.[0m
 看起来很棒！但是，如果我们决定问一个非数学问题呢？如果我们问一个简单的常识问题会怎样？
 
 In [11]:
-```
+```python
 zero_shot_agent("what is the capital of Norway?")
 ```
 Out [11]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m I need to look up the answer
 Action: Look up
@@ -214,7 +214,7 @@ Action Input: N/A [0m
 
 幸运的是，我们可以通过给代理 (Agents) 添加更多工具来解决这个问题！让我们添加一个简单的 LLM 工具：
 
-```
+```python
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
@@ -236,7 +236,7 @@ llm_tool = Tool(
 
 有了这个，我们有了一个新的通用 LLM 工具。我们只需将其添加到 `tools` 列表中并重新初始化代理 (Agents) ：
 
-```
+```python
 tools.append(llm_tool)
 
 # reinitialize the agent
@@ -251,12 +251,12 @@ zero_shot_agent = initialize_agent(
 现在我们可以向代理 (Agents) 提问关于数学和常识的问题。让我们尝试以下问题：
 
 In [15]:
-```
+```python
 zero_shot_agent("what is the capital of Norway?")
 ```
 
 Out [15]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m I need to find out what the capital of Norway is
 Action: Language Model
@@ -272,13 +272,13 @@ Final Answer: The capital of Norway is Oslo.[0m
 现在我们得到了正确的答案！我们可以问第一个问题：
 
 In [16]:
-```
+```python
 zero_shot_agent(" what is (4.5*2.1)^2.2?")
 ```
 
 
 Out [16]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m I need to calculate this expression
 Action: Calculator
@@ -308,7 +308,7 @@ LangChain 提供了几种类型的代理 (Agents) 。在本节中，我们将介
 
 让我们创建一个 `tools` 列表，供代理 (Agents) 使用。我们将包括一个 `llm-math` 工具和一个 SQL 数据库工具，我们在 [这里定义](https://github.com/pinecone-io/examples/blob/master/generation/langchain/handbook/06-langchain-agents.ipynb)。
 
-```
+```python
 tools = load_tools(
     ["llm-math"], 
     llm = llm
@@ -320,7 +320,7 @@ tools.append(sql_tool)
 ```
 我们这样初始化 `zero-shot-react-description` 代理 (Agents) ：
 
-```
+```python
 from langchain.agents import initialize_agent
 
 zero_shot_agent = initialize_agent(
@@ -352,7 +352,7 @@ zero_shot_agent = initialize_agent(
 现在我们可以开始向这个 SQL 数据库提问，并通过计算器工具进行配对计算。
 
 In [16]:
-```
+```python
 result = zero_shot_agent(
     "What is the multiplication of the ratio between stock prices for 'ABC' "
     "and 'XYZ' in January 3rd and the ratio between the same stock prices in "
@@ -360,7 +360,7 @@ result = zero_shot_agent(
 )
 ```
 Out [16]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3m I need to compare the stock prices of 'ABC' and 'XYZ' on two different days
 Action: Stock DB
@@ -391,7 +391,7 @@ Thought:[32;1m[1;3m[0m
 如果我们看一下代理使用的提示，我们就可以看到 LLM 是如何决定使用哪个工具的。
 
 In [17]:
-```
+```python
 print(zero_shot_agent.agent.llm_chain.prompt.template)
 ```
 
@@ -399,7 +399,7 @@ print(zero_shot_agent.agent.llm_chain.prompt.template)
 
 
 Out [17]:
-```
+```python
 Answer the following questions as best you can. You have access to the following tools:
 Calculator: Useful for when you need to answer questions about math.
 Stock DB: Useful for when you need to answer questions about stocks and their prices.
@@ -439,7 +439,7 @@ Zero-shot 代理 (Agents) 的效果很好，但缺乏 [会话式记忆](https://
 
 要初始化代理 (Agents) ，我们首先需要初始化我们想要使用的记忆。我们将使用简单的 `ConversationBufferMemory`。
 
-```
+```python
 from langchain.memory import ConversationBufferMemory
 
 memory = ConversationBufferMemory(memory_key =" chat_history ")
@@ -447,7 +447,7 @@ memory = ConversationBufferMemory(memory_key =" chat_history ")
 ```
 我们在初始化代理 (Agents) 时将其传递给 `memory` 参数：
 
-```
+```python
 conversational_agent = initialize_agent(
     agent ='conversational-react-description', 
     tools = tools, 
@@ -461,13 +461,13 @@ conversational_agent = initialize_agent(
 如果我们用类似的问题运行这个代理 (Agents) ，我们应该会看到与之前类似的过程：
 
 In [22]:
-```
+```python
 result = conversational_agent(
     "Please provide me the stock prices for ABC on January the 1st"
 )
 ```
 Out [22]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m
 Thought: Do I need to use a tool? Yes
@@ -496,13 +496,13 @@ AI: Is there anything else I can help you with?[0m
 到目前为止，这看起来与我们上一个 *Zero-shot* 代理 (Agents) 非常相似。然而，与我们的 Zero-shot 代理 (Agents) *不同*，我们现在可以提问 *后续* 问题。让我们询问一下股票价格在 *同一日期* 上的 *XYZ*，而不指定 1 月 1 日。
 
 In [24]:
-```
+```python
 result = conversational_agent(
     "What are the stock prices for XYZ on the same day?"
 )
 ```
 Out [24]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m
 Thought: Do I need to use a tool? Yes
@@ -526,11 +526,11 @@ AI: Is there anything else I can help you with?[0m
 它是如何做到的呢？我们可以看一下提示模板来找出答案：
 
 In [23]:
-```
+```python
 print(conversational_agent.agent.llm_chain.prompt.template)
 ```
 Out [23]:
-```
+```python
 Assistant is a large language model trained by OpenAI.
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
@@ -560,7 +560,7 @@ New input: {input}
 ```
 我们在提示的开头有一个更大的指令设置，但最重要的是在提示的末尾附近的两行：
 
-```
+```python
 Previous conversation history: {chat_history}
 ```
 这是我们将所有先前的交互添加到提示中的地方。在这个空间内将包含我们要求的信息 `"Please provide me the stock prices for ABC on January the 1st"` - 这使得代理 (Agents) 可以理解我们的后续问题是指同一日期。
@@ -568,7 +568,7 @@ Previous conversation history: {chat_history}
 值得注意的是，与 Zero-shot 代理 (Agents) 相比，会话式 ReAct 代理 (Agents) 在组合多个复杂步骤时会更加困难。如果我们要求代理 (Agents) 回答我们之前的问题，我们可以看到这一点：
 
 In [26]:
-```
+```python
 result = conversational_agent(
     "What is the multiplication of the ratio of the prices of stocks 'ABC' "
     "and 'XYZ' in January 3rd and the ratio of the same prices of the same "
@@ -576,7 +576,7 @@ result = conversational_agent(
 )
 ```
 Out [26]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3mThought: Do I need to use a tool? Yes
 Action: Stock DB
@@ -610,7 +610,7 @@ LangChain docstore 允许我们使用传统的检索方法存储和检索信息�
 
 要初始化这两个工具，我们执行以下操作：
 
-```
+```python
 from langchain import Wikipedia
 from langchain.agents.react.base import DocstoreExplorer
 
@@ -631,7 +631,7 @@ tools = [
 ```
 现在初始化代理 (Agents) ：
 
-```
+```python
 docstore_agent = initialize_agent(
     tools, 
     llm, 
@@ -644,11 +644,11 @@ docstore_agent = initialize_agent(
 让我们尝试以下内容：
 
 In [30]:
-```
+```python
 docstore_agent("What were Archimedes' last words?")
 ```
 Out [30]:
-```
+```python
 [1m> Entering new AgentExecutor chain...[0m
 [32;1m[1;3mThought: I need to search Archimedes and find his last words.
 Action: Search[Archimedes][0m
@@ -664,7 +664,7 @@ Action: Finish["Do not disturb my circles"][0m
 ```
 这个代理 (Agents) 的提示非常长，所以我们会展示一个缩短版。它只包含了几个示例，展示了这个代理 (Agents) 应该如何使用 `Search` 和 `Lookup` 工具：
 
-```
+```python
 Question: What is the elevation range for the area that the eastern sector of the Colorado orogeny extends into?
 
 Thought: I need to search Colorado orogeny, find the area that the eastern sector of the Colorado orogeny extends into, then find the elevation range of the area.
@@ -689,7 +689,7 @@ Action: Finish [1,800 to 7,000 ft]
 ```
 提示中包含了几个类似格式的示例。在提示的末尾，我们看到：
 
-```
+```python
 Question: {input}
 {agent_scratchpad}
 
@@ -704,7 +704,7 @@ Question: {input}
 
 代理 (Agents) 将根据需要执行搜索和提问步骤，以获得最终答案。我们这样初始化代理 (Agents) ：
 
-```
+```python
 from langchain import SerpAPIWrapper
 
 # initialize the search chain
@@ -731,13 +731,13 @@ self_ask_with_search = initialize_agent(
 现在让我们问一个需要多次搜索和“自问”步骤的问题。
 
 In [38]:
-```
+```python
 self_ask_with_search(
     "who lived longer; Plato, Socrates, or Aristotle?"
 )
 ```
 Out [38]:
-```
+```python
 [1m > Entering new AgentExecutor chain...[0m
 [32; 1m [1; 3m Yes.
 Follow up: How old was Plato when he died?[0m
@@ -770,5 +770,5 @@ So the final answer is: Plato [0m
 
 
 ---
-[下一章：为 LLM Agents 构建自定义工具](/docs/langchain-tools/)
+[下一章：为 LLM Agents 构建自定义工具](https://cookbook.langchain.com.cn/docs/langchain-tools/)
 ---

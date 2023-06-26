@@ -28,7 +28,7 @@ transformers 和迁移学习的思想使我们能够通过切换模型“头部 
 
 在这个 LLMs 的新时代，提示是至关重要的。糟糕的提示 In 会产生糟糕的 Out，而好的提示则具有非常强大的能力。构建良好的提示是那些使用 LLMs 的人的关键技能。
 
-[LangChain](/docs/langchain-intro/) 库认识到提示的强大作用，并为其构建了一整套对象。
+[LangChain](https://cookbook.langchain.com.cn/docs/langchain-intro/) 库认识到提示的强大作用，并为其构建了一整套对象。
 
 在本文中，我们将学习有关 `PromptTemplates` 的所有内容，以及有效地实施它们。
 
@@ -61,7 +61,7 @@ transformers 和迁移学习的思想使我们能够通过切换模型“头部 
 让我们看看如何使用 Langchain 将其 In 到 OpenAI 模型中：
 
 In [5]:
-```
+```python
 prompt = """ Answer the question based on the context below. If the
 question cannot be answered using the information provided answer
 with "I don't know".
@@ -77,7 +77,7 @@ Question: Which libraries and model providers offer LLMs?
 Answer: """
 ```
 In [6]:
-```
+```python
 from langchain.llms import OpenAI
 
 # initialize the models
@@ -87,11 +87,11 @@ openai = OpenAI(
 )
 ```
 In [7]:
-```
+```python
 print(openai(prompt))
 ```
 Out [7]:
-```
+```python
  Hugging Face's `transformers` library, OpenAI using the `openai` library, and Cohere using the `cohere` library.
 ```
 实际上，我们不太可能硬编码上下文和用户问题。我们会通过一个 *模板 PromptTemplate* 将它们 In，这就是 Langchain 的 `PromptTemplate` 发挥作用的地方。
@@ -100,7 +100,7 @@ Out [7]:
 ----------------
 Langchain 中的提示模板类旨在简化使用动态 In 构建提示的过程。其中，最简单的是 `PromptTemplate`。我们将通过向我们之前的提示添加一个动态 In `query` 来测试它。
 
-```
+```python
 from langchain import PromptTemplate
 template = "" " Answer the question based on the context below. If the
 question cannot be answered using the information provided answer
@@ -121,7 +121,7 @@ prompt_template = PromptTemplate(
 通过这样做，我们可以使用 `prompt_template` 上的 `format` 方法来查看将查询传递给模板的效果。
 
 In [9]:
-```
+```python
 print(
     prompt_template.format(
         query = "Which libraries and model providers offer LLMs?"
@@ -129,7 +129,7 @@ print(
 )
 ```
 Out [9]:
-```
+```python
 Answer the question based on the context below. If the
 question cannot be answered using the information provided answer
 with "I don't know".
@@ -145,7 +145,7 @@ Answer:
 当然，我们可以直接将其 Out 传递给 LLM 对象，如下所示：
 
 In [10]:
-```
+```python
 print(openai(
     prompt_template.format(
         query = "Which libraries and model providers offer LLMs?"
@@ -153,7 +153,7 @@ print(openai(
 ))
 ```
 Out [10]:
-```
+```python
  Hugging Face's `transformers` library, OpenAI using the `openai` library, and Cohere using the `cohere` library.
 
 ```
@@ -178,7 +178,7 @@ Langchain 的 `FewShotPromptTemplate` 适用于 **来源知识** In。
  我们可以通过以下示例来看到这一点：
 
 In [12]:
-```
+```python
 prompt = "" " The following is a conversation with an AI assistant.
 The assistant is typically sarcastic and witty, producing creative 
 and funny responses to the users questions. Here are some examples: 
@@ -191,7 +191,7 @@ openai.temperature = 1.0  # increase creativity/randomness of output
 print(openai(prompt))
 ```
 Out [12]:
-```
+```python
  Life is like a box of chocolates, you never know what you're gonna get!
 
 ```
@@ -200,7 +200,7 @@ Out [12]:
 为了帮助模型，我们可以给它一些我们想要的回答类型的示例：
 
 In [13]:
-```
+```python
 prompt = "" " The following are exerpts from conversations with an AI
 assistant. The assistant is typically sarcastic and witty, producing
 creative  and funny responses to the users questions. Here are some
@@ -218,13 +218,13 @@ AI: "" "
 print(openai(prompt))
 ```
 Out [13]:
-```
+```python
  42, of course!
 
 ```
 通过示例来强化我们在提示中传递的指令，我们更有可能得到一个更有趣的回答。然后，我们可以使用 Langchain 的 `FewShotPromptTemplate` 规范化这个过程：
 
-```
+```python
 from langchain import FewShotPromptTemplate
 
 # create our examples
@@ -274,12 +274,12 @@ few_shot_prompt_template = FewShotPromptTemplate(
 如果我们将 `examples` 和用户 `query` 传递进去，我们将得到这个结果：
 
 In [15]:
-```
+```python
 query = "What is the meaning of life?"
 print(few_shot_prompt_template.format(query = query))
 ```
 Out [15]:
-```
+```python
 The following are exerpts from conversations with an AI
 assistant. The assistant is typically sarcastic and witty, producing
 creative  and funny responses to the users questions. Here are some
@@ -308,7 +308,7 @@ AI:
 
 `FewShotPromptTemplate` 允许我们根据这些变量来可变地包含示例。首先，我们创建一个更广泛的 `examples` 列表：
 
-```
+```python
 examples = [
     {
         "query": "How are you?",
@@ -337,7 +337,7 @@ examples = [
 ```
 此后，我们实际上使用 `LengthBasedExampleSelector` 来使用这个 `examples`：
 
-```
+```python
 from langchain.prompts.example_selector import LengthBasedExampleSelector
 example_selector = LengthBasedExampleSelector(
     examples = examples,
@@ -349,20 +349,20 @@ example_selector = LengthBasedExampleSelector(
 需要注意的是，我们将 `max_length` 视为通过空格和换行符拆分字符串得到的单词数。具体的逻辑如下：
 
 In [30]：
-```
+```python
 import re
 some_text = "There are a total of 8 words here.\nPlus 6 here, totaling 14 words."
 words = re.split('[\n ]', some_text)
 print(words, len(words))
 ```
 Out [30]：
-```
+```python
 ['There', 'are', 'a', 'total', 'of', '8', 'words', 'here.', 'Plus', '6', 'here,', 'totaling', '14', 'words.'] 14
 
 ```
 然后将我们的 `example_selector` 传递给 `FewShotPromptTemplate` 来创建一个新的（动态的）提示模板：
 
-```
+```python
 # now create the few shot prompt template
 dynamic_prompt_template = FewShotPromptTemplate(
     example_selector = example_selector,  # use example_selector instead of examples
@@ -377,11 +377,11 @@ dynamic_prompt_template = FewShotPromptTemplate(
 现在，如果我们传递一个较短或较长的查询，我们应该会看到所包含的示例数量会有所变化。
 
 In [32]：
-```
+```python
 print(dynamic_prompt_template.format(query = "How do birds fly?"))
 ```
 Out [32]：
-```
+```python
 The following are exerpts from conversations with an AI
 assistant. The assistant is typically sarcastic and witty, producing
 creative  and funny responses to the users questions. Here are some
@@ -396,7 +396,7 @@ AI:
 传递较长的问题将导致所包含的示例数量减少：
 In [34]：
 
-```
+```python
 query = "" " If I am in America, and I want to call someone in another country, I'm
 thinking maybe Europe, possibly western Europe like France, Germany, or the UK,
 what is the best way to do that?"" "
@@ -404,7 +404,7 @@ print(dynamic_prompt_template.format(query = query))
 ```
 Out [34]：
 
-```
+```python
 The following are exerpts from conversations with an AI
 assistant. The assistant is typically sarcastic and witty, producing
 creative  and funny responses to the users questions. Here are some
@@ -434,5 +434,5 @@ AI:
 
 
 ---
-[下一章：Langchain 中的记忆](/docs/langchain-conversational-memory/)
+[下一章：Langchain 中的记忆](https://cookbook.langchain.com.cn/docs/langchain-conversational-memory/)
 ---

@@ -41,14 +41,14 @@ Fixing Hallucination with Knowledge Bases
 
 
 In [2]:
-```
+```python
 from datasets import load_dataset
 
 data = load_dataset("wikipedia", "20220301.simple", split ='train [: 10000]')
 data
 ```
 Out[2]:
-```
+```python
 Downloading readme:   0%|          | 0.00/16.3k [00: 00 <?, ?B/s]
 
 Dataset({
@@ -58,11 +58,11 @@ Dataset({
 ```
 
 In[3]:
-```
+```python
 data [6]
 ```
 Out[3]:
-```
+```python
 {'id': '13',
 
  'url': 'https://simple.wikipedia.org/wiki/Alan%20Turing',
@@ -90,7 +90,7 @@ Out[3]:
 
 我们将使用`gpt-3.5-turbo`作为我们的模型，并且我们可以像下面这样初始化该模型的标记器 （Tokenizer） ：
 
-```
+```python
 import tiktoken  # ! pip install tiktoken
 
 tokenizer = tiktoken.get_encoding('p50k_base')
@@ -101,7 +101,7 @@ tokenizer = tiktoken.get_encoding('p50k_base')
 
 
 In[28]:
-```
+```python
 # create the length function
 def tiktoken_len(text):
     tokens = tokenizer.encode(
@@ -114,12 +114,12 @@ tiktoken_len("hello I am a chunk of text and using the tiktoken_len function "
              "we can find the length of this chunk of text in tokens")
 ```
 Out[28]:
-```
+```python
 28
 ```
 有了我们的标记计数函数，我们可以初始化一个LangChain `RecursiveCharacterTextSplitter`对象。该对象将允许我们将文本分割成不超过我们通过`chunk_size`参数指定的长度的块。
 
-```
+```python
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 text_splitter = RecursiveCharacterTextSplitter(
@@ -134,12 +134,12 @@ text_splitter = RecursiveCharacterTextSplitter(
 
 
 In[6]:
-```
+```python
 chunks = text_splitter.split_text(data [6]['text'])[: 3]
 chunks
 ```
 Out[6]:
-```
+```python
 ['Alan Mathison Turing OBE FRS (London, 23 June 1912 – Wilmslow, Cheshire, 7 June 1954) was an English mathematician and computer scientist. He was born in Maida Vale, London.\n\nEarly life and family \nAlan Turing was born in Maida Vale, London on 23 June 1912. His father was part of a family of merchants from Scotland. His mother, Ethel Sara, was the daughter of an engineer.\n\nEducation \nTuring went to St. Michael\'s, a school at 20 Charles Road, St Leonards-on-sea, when he was five years old.\n " This is only a foretaste of what is to come, and only the shadow of what is going to be.” – Alan Turing.\n\nThe Stoney family were once prominent landlords, here in North Tipperary. His mother Ethel Sara Stoney (1881–1976) was daughter of Edward Waller Stoney (Borrisokane, North Tipperary) and Sarah Crawford (Cartron Abbey, Co. Longford); Protestant Anglo-Irish gentry.\n\nEducated in Dublin at Alexandra School and College; on October 1st 1907 she married Julius Mathison Turing, latter son of Reverend John Robert Turing and Fanny Boyd, in Dublin. Born on June 23rd 1912, Alan Turing would go on to be regarded as one of the greatest figures of the twentieth century.\n\nA brilliant mathematician and cryptographer Alan was to become the founder of modern-day computer science and artificial intelligence; designing a machine at Bletchley Park to break secret Enigma encrypted messages used by the Nazi German war machine to protect sensitive commercial, diplomatic and military communications during World War 2. Thus, Turing made the single biggest contribution to the Allied victory in the war against Nazi Germany, possibly saving the lives of an estimated 2 million people, through his effort in shortening World War II.',
 
 
@@ -151,11 +151,11 @@ Out[6]:
 这些块没有超过我们之前设置的400个块大小限制：
 
 In[7]:
-```
+```python
 tiktoken_len(chunks [0]), tiktoken_len(chunks [1]), tiktoken_len(chunks [2])
 ```
 Out[7]:
-```
+```python
 (397, 304, 399)
 ```
 
@@ -177,7 +177,7 @@ Out[7]:
 
 我们可以通过LangChain这样初始化它：
 
-```
+```python
 from langchain.embeddings.openai import OpenAIEmbeddings
 
 model_name = 'text-embedding-ada-002'
@@ -193,7 +193,7 @@ embed = OpenAIEmbeddings(
 
 
 In[10]:
-```
+```python
 texts = [
     'this is the first chunk of text',
     'then another second chunk of text is here'
@@ -203,7 +203,7 @@ res = embed.embed_documents(texts)
 len(res), len(res [0])
 ```
 Out[10]:
-```
+```python
 (2, 1536)
 ```
 从中，我们得到了*两个*嵌入 （Embeddings） ，因为我们传入了两个文本块。
@@ -218,7 +218,7 @@ Out[10]:
 
 我们将使用Pinecone矢量数据库 （Vector Database） 。要使用它，我们需要一个[免费的API密钥](https://app.pinecone.io/)。然后我们可以像这样初始化我们的数据库索引：
 
-```
+```python
 import pinecone
 
 
@@ -241,7 +241,7 @@ pinecone.create_index(
 
 
 In[12]:
-```
+```python
 
 Index = pinecone.GRPCIndex(index_name)
 
@@ -249,7 +249,7 @@ Index = pinecone.GRPCIndex(index_name)
 Index.describe_index_stats()
 ```
 Out[12]:
-```
+```python
 {'dimension': 1536,
 
 
@@ -267,7 +267,7 @@ Out[12]:
 
 我们可以批量处理此过程以加快速度。
 
-```
+```python
 from tqdm.auto import tqdm
 from uuid import uuid4
 
@@ -305,12 +305,12 @@ for i, record in enumerate(tqdm(data)):
 
 
 In[14]:
-```
+```python
 
 Index.describe_index_stats()
 ```
 Out[14]:
-```
+```python
 {'dimension': 1536,
 
 
@@ -330,7 +330,7 @@ LangChain矢量存储与查询
 
 但是，我们要回到LangChain，所以我们应该通过LangChain库重新连接到我们的索引。
 
-```
+```python
 from langchain.vectorstores import Pinecone
 
 text_field = "text"
@@ -347,7 +347,7 @@ vectorstore = Pinecone(
 我们可以使用`similarity search`方法直接进行查询，并返回文本块，而无需LLM生成响应。
 
 In[16]:
-```
+```python
 query = "who was Benito Mussolini?"
 
 vectorstore.similarity_search(
@@ -356,7 +356,7 @@ vectorstore.similarity_search(
 )
 ```
 Out[16]:
-```
+```python
 [Document(page_content ='Benito Amilcare Andrea Mussolini KSMOM GCTE (29 July 1883 – 28 April 1945) was an Italian politician and journalist. He was also the Prime Minister of Italy from 1922 until 1943. He was the leader of the National Fascist Party.\n\nBiography\n\nEarly life\nBenito Mussolini was named after Benito Juarez, a Mexican opponent of the political power of the Roman Catholic Church, by his anticlerical (a person who opposes the political interference of the Roman Catholic Church in secular affairs) father. Mussolini\'s father was a blacksmith. Before being involved in politics, Mussolini was a newspaper editor (where he learned all his propaganda skills) and elementary school teacher.\n\nAt first, Mussolini was a socialist, but when he wanted Italy to join the First World War, he was thrown out of the socialist party. He \'invented\' a new ideology, Fascism, much out of Nationalist\xa0and Conservative views.\n\nRise to power and becoming dictator\nIn 1922, he took power by having a large group of men, "Black Shirts," march on Rome and threaten to take over the government. King Vittorio Emanuele III gave in, allowed him to form a government, and made him prime minister. In the following five years, he gained power, and in 1927 created the OVRA, his personal secret police force. Using the agency to arrest, scare, or murder people against his regime, Mussolini was dictator\xa0of Italy by the end of 1927. Only the King and his own Fascist party could challenge his power.', lookup_str ='', metadata ={'chunk': 0.0, 'source': 'https://simple.wikipedia.org/wiki/Benito%20Mussolini', 'title': 'Benito Mussolini', 'wiki-id': '6754'}, lookup_index = 0),
 
 
@@ -373,7 +373,7 @@ Out[16]:
 
 在生成式问答（GQA）中，我们将问题传递给LLM，但指示它基于从知识库返回的信息来回答问题。我们可以在LangChain中轻松实现这一点，使用`RetrievalQA`链。
 
-```
+```python
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import RetrievalQA
 
@@ -395,11 +395,11 @@ qa = RetrievalQA.from_chain_type(
 
 
 In[22]:
-```
+```python
 qa.run(query)
 ```
 Out[22]:
-```
+```python
 'Benito Mussolini was an Italian politician and journalist who served as the Prime Minister of Italy from 1922 until 1943. He was the leader of the National Fascist Party and invented the ideology of Fascism. Mussolini was a dictator of Italy by the end of 1927, and his form of Fascism, "Italian Fascism," was different and less destructive than Hitler\'s Nazism. Mussolini wanted Italy to become a new Roman Empire and attacked several countries, including Abyssinia (now called Ethiopia) and Greece. He was removed from power in 1943 and was executed by Italian partisans in 1945.'
 ```
 这次我们得到的响应是由我们的`gpt-3.5-turbo` LLM根据从我们的向量数据库检索到的信息生成的。
@@ -412,7 +412,7 @@ Out[22]:
 
 
 In[23]:
-```
+```python
 from langchain.chains import RetrievalQAWithSourcesChain
 
 qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
@@ -423,11 +423,11 @@ qa_with_sources = RetrievalQAWithSourcesChain.from_chain_type(
 ```
 
 In[24]:
-```
+```python
 qa_with_sources(query)
 ```
 Out[24]:
-```
+```python
 {'question': 'who was Benito Mussolini?',
 
 
@@ -452,5 +452,5 @@ Out[24]:
 
 
 ---
-[下一章：在 LangChain 中使用对话代理 (Agents) 实现超能力 LLMs](/docs/langchain-agents/)
+[下一章：在 LangChain 中使用对话代理 (Agents) 实现超能力 LLMs](https://cookbook.langchain.com.cn/docs/langchain-agents/)
 ---

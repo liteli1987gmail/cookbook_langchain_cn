@@ -14,13 +14,13 @@
 
 有许多应用场景，记住先前的交互非常重要，比如聊天机器人。 ` ConversationChain ` 对话记忆使我们能够做到这一点。
 
-有几种方法可以实现对话记忆。在 [LangChain](/docs/langchain-intro/) 的上下文中，它们都是构建在 ` ConversationChain ` 之上的。
+有几种方法可以实现对话记忆。在 [LangChain](https://cookbook.langchain.com.cn/docs/langchain-intro/) 的上下文中，它们都是构建在 ` ConversationChain ` 之上的。
 
 ConversationChain
 -----------------
 我们可以通过初始化 ` ConversationChain ` 来开始。我们将使用 OpenAI 的 ` text-davinci-003 ` 作为 LLM，但也可以使用其他模型，比如 `gpt-3.5-turbo` 。
 
-```
+```python
 from langchain import OpenAI
 from langchain.chains import ConversationChain
 
@@ -38,11 +38,11 @@ conversation = ConversationChain(llm=llm)
 我们可以这样查看 `ConversationChain` 的提示模板：
 
 In [8]:
-```
+```python
 print(conversation.prompt.template)
 ```
 Out[8]:
-```
+```python
 The following is a friendly conversation between a human and an AI. The AI is talkative and provides lots of specific details from its context. If the AI does not know the answer to a question, it truthfully says it does not know.
 
 Current conversation:
@@ -56,7 +56,7 @@ AI:
 ```
 在这里，提示模板告诉模型以下内容是人类 Human（我们）与 AI（`text-davinci-003`）之间的对话。通过陈述这些内容，提示模板试图减少*幻觉*（模型编造事物）的发生：
 
-```
+```python
 "If the AI does not know the answer to a question, it truthfully says it does not know."
 
 ```
@@ -83,7 +83,7 @@ AI:
 如上所述，过去人类和AI之间的原始对话输入以其原始形式传递给 `{history}` 参数。
 
 In[11]:
-```
+```python
 from langchain.chains.conversation.memory import ConversationBufferMemory
 
 conversation_buf = ConversationChain(
@@ -92,11 +92,11 @@ conversation_buf = ConversationChain(
 )
 ```
 In[32]:
-```
+```python
 conversation_buf("Good morning AI!")
 ```
 Out[32]:
-```
+```python
 {'input': 'Good morning AI!',
  'history': '',
  'response': " Good morning! It's a beautiful day today, isn't it? How can I help you?"}
@@ -108,7 +108,7 @@ Out[32]:
 我们还添加了一个`count_tokens`函数，以便我们可以看到每个交互使用了多少令牌 （Tokens） 。
 
 In[6]:
-```
+```python
 from langchain.callbacks import get_openai_callback
 
 def count_tokens(chain, query):
@@ -119,7 +119,7 @@ def count_tokens(chain, query):
     return result
 ```
 In[33]:
-```
+```python
 count_tokens(
     conversation_buf, 
     "My interest here is to explore the potential of integrating Large Language Models with external knowledge"
@@ -127,7 +127,7 @@ count_tokens(
 ```
 
 Out[33]:
-```
+```python
 Spent a total of 179 tokens
 """Interesting! Large Language Models are a type of artificial intelligence that can process natural language and generate text.
  They can be used to generate text from a given context, or to answer questions about a given context. 
@@ -135,48 +135,48 @@ Spent a total of 179 tokens
  Is there anything else I can help you with?"""
 ```
 In[34]:
-```
+```python
 count_tokens(
     conversation_buf,
     "I just want to analyze the different possibilities. What can you think of?"
 )
 ```
 Out[34]:
-```
+```python
 Spent a total of 268 tokens
 ' Well, integrating Large Language Models with external knowledge can open up a lot of possibilities. For example, you could use them to generate more accurate and detailed summaries of text, or to answer questions about a given context more accurately. You could also use them to generate more accurate translations, or to generate more accurate predictions about future events.'
 ```
 In[35]:
-```
+```python
 count_tokens(
     conversation_buf, 
     "Which data source types could be used to give context to the model?"
 )
 ```
 Out[35]:
-```
+```python
 Spent a total of 360 tokens
 '  There are a variety of data sources that could be used to give context to a Large Language Model. These include structured data sources such as databases, unstructured data sources such as text documents, and even audio and video data sources. Additionally, you could use external knowledge sources such as Wikipedia or other online encyclopedias to provide additional context.'
 ```
 In[36]:
-```
+```python
 count_tokens(
     conversation_buf, 
     "What is my aim again?"
 )
 ```
 Out[36]:
-```
+```python
 Spent a total of 388 tokens
 ' Your aim is to explore the potential of integrating Large Language Models with external knowledge.'
 ```
 LLM可以清楚地记住对话的历史。让我们来看一下`ConversationBufferMemory`是如何存储对话历史的：
 In[37]:
-```
+```python
 print(conversation_buf.memory.buffer)
 ```
 Out[37]:
-```
+```python
 
 Human: Good morning AI!
 AI:  Good morning! It's a beautiful day today, isn't it? How can I help you?
@@ -213,7 +213,7 @@ AI:  Your aim is to explore the potential of integrating Large Language Models w
 
 我们可以这样初始化`ConversationChain`以使用总结记忆：
 
-```
+```python
 from langchain.chains.conversation.memory import ConversationSummaryMemory
 
 conversation = ConversationChain(
@@ -227,11 +227,11 @@ conversation = ConversationChain(
 我们可以在这里看到用于此操作的提示：
 
 In[19]:
-```
+```python
 print(conversation_sum.memory.prompt.template)
 ```
 Out[19]:
-```
+```python
 Progressively summarize the lines of conversation provided, adding onto the previous summary returning a new summary.
 
 EXAMPLE
@@ -260,7 +260,7 @@ New summary:
 让我们再次进行一次对话，利用这种方法。
 
 In[40]:
-```
+```python
 # without count_tokens we'd call `conversation_sum("Good morning AI!")`
 # but let's keep track of our tokens:
 count_tokens(
@@ -269,55 +269,55 @@ count_tokens(
 )
 ```
 Out[40]:
-```
+```python
 Spent a total of 290 tokens
 " Good morning! It's a beautiful day today, isn't it? How can I help you?"
 ```
 In[41]:
-```
+```python
 count_tokens(
     conversation_sum, 
     "My interest here is to explore the potential of integrating Large Language Models with external knowledge"
 )
 ```
 Out[41]:
-```
+```python
 Spent a total of 440 tokens
 " That sounds like an interesting project! I'm familiar with Large Language Models, but I'm not sure how they could be integrated with external knowledge. Could you tell me more about what you have in mind?"
 ```
 In[42]:
-```
+```python
 count_tokens(
     conversation_sum, 
     "I just want to analyze the different possibilities. What can you think of?"
 )
 ```
 Out[42]:
-```
+```python
 Spent a total of 664 tokens
 ' I can think of a few possibilities. One option is to use a large language model to generate a set of candidate answers to a given query, and then use external knowledge to filter out the most relevant answers. Another option is to use the large language model to generate a set of candidate answers, and then use external knowledge to score and rank the answers. Finally, you could use the large language model to generate a set of candidate answers, and then use external knowledge to refine the answers.'
 ```
 In[43]:
-```
+```python
 count_tokens(
     conversation_sum, 
     "Which data source types could be used to give context to the model?"
 )
 ```
 Out[43]:
-```
+```python
 Spent a total of 799 tokens
 ' There are many different types of data sources that could be used to give context to the model. These could include structured data sources such as databases, unstructured data sources such as text documents, or even external APIs that provide access to external knowledge. Additionally, the model could be trained on a combination of these data sources to provide a more comprehensive understanding of the context.'
 ```
 In[44]:
-```
+```python
 count_tokens(
     conversation_sum, 
     "What is my aim again?"
 )
 ```
 Out[44]:
-```
+```python
 Spent a total of 853 tokens
 ' Your aim is to explore the potential of integrating Large Language Models with external knowledge.'
 ```
@@ -326,11 +326,11 @@ Spent a total of 853 tokens
 我们可以这样看到这个总结的原始形式：
 
 In[45]:
-```
+```python
 print(conversation_sum.memory.buffer)
 ```
 Out[45]:
-```
+```python
 
 The human greeted the AI with a good morning, to which the AI responded with a good morning and asked how it could help. The human expressed interest in exploring the potential of integrating Large Language Models with external knowledge, to which the AI responded positively and asked for more information. The human asked the AI to think of different possibilities, and the AI suggested three options: using the large language model to generate a set of candidate answers and then using external knowledge to filter out the most relevant answers, score and rank the answers, or refine the answers. The human then asked which data source types could be used to give context to the model, to which the AI responded that there are many different types of data sources that could be used, such as structured data sources, unstructured data sources, or external APIs. Additionally, the model could be trained on a combination of these data sources to provide a more comprehensive understanding of the context. The human then asked what their aim was again, to which the AI responded that their aim was to explore the potential of integrating Large Language Models with external knowledge.
 
@@ -371,7 +371,7 @@ The human greeted the AI with a good morning, to which the AI responded with a g
 
 我们使用它的方式如下所示：
 
-```
+```python
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 
 conversation = ConversationChain(
@@ -386,62 +386,62 @@ conversation = ConversationChain(
 
 
 In[61]:
-```
+```python
 count_tokens(
     conversation_bufw, 
     "Good morning AI!"
 )
 ```
 Out[61]:
-```
+```python
 Spent a total of 85 tokens
 " Good morning! It's a beautiful day today, isn't it? How can I help you?"
 ```
 In[62]:
-```
+```python
 count_tokens(
     conversation_bufw, 
     "My interest here is to explore the potential of integrating Large Language Models with external knowledge"
 )
 ```
 Out[62]:
-```
+```python
 Spent a total of 178 tokens
 ' Interesting! Large Language Models are a type of artificial intelligence that can process natural language and generate text. They can be used to generate text from a given context, or to answer questions about a given context. Integrating them with external knowledge can help them to better understand the context and generate more accurate results. Do you have any specific questions about this integration?'
 ```
 In[63]:
-```
+```python
 count_tokens(
     conversation_bufw, 
     "I just want to analyze the different possibilities. What can you think of?"
 )
 ```
 Out[63]:
-```
+```python
 Spent a total of 233 tokens
 ' There are many possibilities for integrating Large Language Models with external knowledge. For example, you could use external knowledge to provide additional context to the model, or to provide additional training data. You could also use external knowledge to help the model better understand the context of a given text, or to help it generate more accurate results.'
 ```
 In[64]:
-```
+```python
 count_tokens(
     conversation_bufw, 
     "Which data source types could be used to give context to the model?"
 )
 ```
 Out[64]:
-```
+```python
 Spent a total of 245 tokens
 ' Data sources that could be used to give context to the model include text corpora, structured databases, and ontologies. Text corpora provide a large amount of text data that can be used to train the model and provide additional context. Structured databases provide structured data that can be used to provide additional context to the model. Ontologies provide a structured representation of knowledge that can be used to provide additional context to the model.'
 ```
 In[65]:
-```
+```python
 count_tokens(
     conversation_bufw, 
     "What is my aim again?"
 )
 ```
 Out[65]:
-```
+```python
 Spent a total of 186 tokens
 ' Your aim is to use data sources to give context to the model.'
 ```
@@ -452,17 +452,17 @@ Spent a total of 186 tokens
 我们可以这样查看模型的 “记忆” 效果：
 
 In[66]:
-```
+```python
 bufw_history = conversation_bufw.memory.load_memory_variables(
     inputs = []
 )['history']:
 ```
 In[67]:
-```
+```python
 print(bufw_history)
 ```
 Out[67]:
-```
+```python
 Human: What is my aim again?
 AI:  Your aim is to use data sources to give context to the model.
 
@@ -484,7 +484,7 @@ AI:  Your aim is to use data sources to give context to the model.
 
 它的初始化方式如下所示：
 
-```
+```python
 conversation_sum_bufw = ConversationChain(
     llm = llm, memory = ConversationSummaryBufferMemory(
         llm = llm,
@@ -530,5 +530,5 @@ conversation_sum_bufw = ConversationChain(
 
 
 ---
-[下一章：使用知识库修复幻觉](/docs/langchain-retrieval-augmentation/)
+[下一章：使用知识库修复幻觉](https://cookbook.langchain.com.cn/docs/langchain-retrieval-augmentation/)
 ---

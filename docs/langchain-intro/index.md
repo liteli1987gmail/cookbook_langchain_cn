@@ -36,7 +36,7 @@ LangChain 的核心，LangChain 是围绕 LLMs 构建的框架。我们可以将
 ### 在 LangChain 中创建 Prompt 提示
 让我们组合一个简单的问答提示模板。我们首先需要安装 `langchain` 库。
 
-```
+```python
 !pip install langchain
 
 ```
@@ -47,7 +47,7 @@ LangChain 的核心，LangChain 是围绕 LLMs 构建的框架。我们可以将
 
 从这里，我们导入 `PromptTemplate` 类并初始化一个模板，如下所示：
 
-```
+```python
 from langchain import PromptTemplate
 
 template = """Question: {question}
@@ -65,7 +65,7 @@ question = "Which NFL team won the Super Bowl in the 2010 season?"
 
 当使用这些提示模板与给定的 `question` 时，我们将获得：
 
-```
+```python
 Question: Which NFL team won the Super Bowl in the 2010 season?
 
 Answer: 
@@ -80,7 +80,7 @@ Hugging Face Hub LLM
 LangChain 中的 Hugging Face Hub 端点连接到 Hugging Face Hub，并通过其免费推理端点运行模型。我们需要一个 [Hugging Face 帐户和 API 密钥](https://huggingface.co/settings/tokens) 来使用这些端点。
 获得 API 密钥后，我们将其添加到 `HUGGINGFACEHUB_API_TOKEN` 环境变量中。我们可以使用 Python 来做到这一点：
 
-```
+```python
 import os
 
 os.environ['HUGGINGFACEHUB_API_TOKEN'] = 'HF_API_KEY'
@@ -88,7 +88,7 @@ os.environ['HUGGINGFACEHUB_API_TOKEN'] = 'HF_API_KEY'
 ```
 然后，我们必须通过 Pip 安装 `huggingface_hub` 库。
 
-```
+```python
 !pip install huggingface_hub
 
 ```
@@ -103,7 +103,7 @@ os.environ['HUGGINGFACEHUB_API_TOKEN'] = 'HF_API_KEY'
 ---
 
 In[3]:
-```
+```python
 from langchain import HuggingFaceHub, LLMChain
 
 # initialize Hub LLM
@@ -123,7 +123,7 @@ print(llm_chain.run(question))
 ```
 
 Out[3]:
-```
+```python
 green bay packers
 
 ```
@@ -135,7 +135,7 @@ green bay packers
 从选项（1）开始，让我们看看如何使用`generate`方法：
 
 In[4]:
-```
+```python
 qs = [
     {'question': "Which NFL team won the Super Bowl in the 2010 season?"},
     {'question': "If I am 6 ft 4 inches, how tall am I in centimeters?"},
@@ -146,14 +146,14 @@ res = llm_chain.generate(qs)
 res
 ```
 Out[4]:
-```
+```python
 LLMResult(generations = [[Generation(text ='green bay packers', generation_info = None)], [Generation(text ='184', generation_info = None)], [Generation(text ='john glenn', generation_info = None)], [Generation(text ='one', generation_info = None)]], llm_output = None)
 ```
     除了第一个问题外，我们得到的结果都很糟糕。这只是所使用的LLM的局限性。
 
     如果模型无法准确回答单个问题，将所有查询组合到一个提示中很可能不起作用。不过，为了进行实验，让我们试试。
 In[6]:
-```
+```python
 multi_template = "" " Answer the following questions one at a time.
 
 Questions:
@@ -178,7 +178,7 @@ qs_str = (
 print(llm_chain.run(qs_str))
 ```
 Out[6]:
-```
+```python
 If I am 6 ft 4 inches, how tall am I in centimeters
 
 ```
@@ -189,7 +189,7 @@ OpenAI LLMs
 LangChain 中的 OpenAI 端点直接或通过 Azure 连接到 OpenAI。我们需要一个[ OpenAI 帐户和 API 密钥](https://beta.openai.com/account/api-keys)来使用这些端点。
 获得 API 密钥后，我们将其添加到`OPENAI_API_TOKEN`环境变量中。我们可以使用 Python 来做到这一点：
 
-```
+```python
 import os
 
 os.environ['OPENAI_API_TOKEN'] = 'OPENAI_API_KEY'
@@ -197,13 +197,13 @@ os.environ['OPENAI_API_TOKEN'] = 'OPENAI_API_KEY'
 ```
 然后，我们必须通过 Pip 安装`openai`库。
 
-```
+```python
 ! pip install openai
 
 ```
 现在，我们可以使用 OpenAI 的 GPT-3 生成（或 *completion* ）模型生成文本。我们将使用[`text-davinci-003`](https://huggingface.co/google/flan-t5-xl)。
 
-```
+```python
 from langchain.llms import OpenAI
 
 davinci = OpenAI(model_name ='text-davinci-003')
@@ -214,7 +214,7 @@ davinci = OpenAI(model_name ='text-davinci-003')
 ---
 *或者，如果您使用的是Azure上的OpenAI，则可以执行以下操作：*
 
-```
+```python
 from langchain.llms import AzureOpenAI
 
 llm = AzureOpenAI(
@@ -228,7 +228,7 @@ llm = AzureOpenAI(
 ---
 我们将与 Hugging Face 示例一样使用相同的简单问答提示模板。唯一的变化是我们现在传递我们的 OpenAI LLM `davinci`：
 In[15]:
-```
+```python
 llm_chain = LLMChain(
     prompt = prompt,
     llm = davinci
@@ -237,7 +237,7 @@ llm_chain = LLMChain(
 print(llm_chain.run(question))
 ```
 Out[15]:
-```
+```python
  The Green Bay Packers won the Super Bowl in the 2010 season.
 
 ```
@@ -245,7 +245,7 @@ Out[15]:
 正如预期的那样，我们得到了正确的答案。我们可以使用`generate`来处理多个问题：
 
 In[16]:
-```
+```python
 qs = [
     {'question': "Which NFL team won the Super Bowl in the 2010 season?"},
     {'question': "If I am 6 ft 4 inches, how tall am I in centimeters?"},
@@ -256,14 +256,14 @@ llm_chain.generate(qs)
 ```
 
 Out[16]:
-```
+```python
 LLMResult(generations = [[Generation(text =' The Green Bay Packers won the Super Bowl in the 2010 season.', generation_info ={'finish_reason': 'stop', 'logprobs': None})], [Generation(text =' 193.04 centimeters', generation_info ={'finish_reason': 'stop', 'logprobs': None})], [Generation(text =' Charles Duke was the 12th person on the moon. He was part of the Apollo 16 mission in 1972.', generation_info ={'finish_reason': 'stop', 'logprobs': None})], [Generation(text =' A blade of grass does not have any eyes.', generation_info ={'finish_reason': 'stop', 'logprobs': None})]], llm_output ={'token_usage': {'total_tokens': 124, 'prompt_tokens': 75, 'completion_tokens': 49}})
 ```
 
 我们大部分的结果都是正确的或有一定的真实性。与`google/flan-t5-xl`模型相比，该模型的性能显然更好。与之前一样，让我们尝试将所有问题一次性输入模型。
 
 In[17]:
-```
+```python
 llm_chain = LLMChain(
     prompt = long_prompt,
     llm = davinci
@@ -279,7 +279,7 @@ qs_str = (
 print(llm_chain.run(qs_str))
 ```
 Out[17]:
-```
+```python
 The New Orleans Saints won the Super Bowl in the 2010 season.
 6 ft 4 inches is 193 centimeters.
 The 12th person on the moon was Harrison Schmitt.
@@ -300,5 +300,5 @@ A blade of grass does not have eyes.
 
 
 ---
-[下一章：使用 Langchain 进行提示工程和 LLMs](/docs/langchain-prompt-templates/)
+[下一章：使用 Langchain 进行提示工程和 LLMs](https://cookbook.langchain.com.cn/docs/langchain-prompt-templates/)
 ---
